@@ -57,6 +57,7 @@ jobs:
       - run: nix develop .#obs-v32 --command bash -c 'cargo clippy --workspace --all-targets --no-deps -- -D warnings'
 
   build_linux:
+    name: build_linux (v${{ matrix.obs }})
     strategy:
       fail-fast: false
       matrix:
@@ -91,6 +92,7 @@ jobs:
               --no-default-features --features obs-${{ matrix.obs }}
 
   build_macos:
+    name: build_macos (v${{ matrix.obs_full_version }})
     strategy:
       fail-fast: false
       matrix:
@@ -159,6 +161,7 @@ jobs:
           DYLD_FALLBACK_LIBRARY_PATH: "/Applications/OBS.app/Contents/Frameworks"
 
   build_windows:
+    name: build_windows (v${{ matrix.choco_version }})
     strategy:
       fail-fast: false
       matrix:
