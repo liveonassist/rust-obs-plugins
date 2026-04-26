@@ -275,6 +275,12 @@ fn main() {
         .blocklist_type("_bindgen_ty_2")
         .blocklist_type("_bindgen_ty_3")
         .blocklist_type("_bindgen_ty_4")
+        // ARM NEON multi-vector aggregate types (e.g. int8x8x2_t) leak in from
+        // <arm_neon.h> on aarch64 macOS. bindgen emits a layout assertion of
+        // the form `align_of::<T>() - 8usize` that underflows in const eval
+        // for these types. OBS doesn't expose them in its public API, so just
+        // drop them from the generated bindings.
+        .blocklist_type("(u?int|float|bfloat|poly)[0-9]+x[0-9]+x[0-9]+_t")
         .derive_default(true)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
 
