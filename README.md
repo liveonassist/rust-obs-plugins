@@ -1,72 +1,35 @@
-# Fork repository
+# rust-obs-plugins
 
-- init submodules (obs for obs-sys)
-- update obs `git submodule update --remote`
-- update rust-bindings
+> Forked from [TakiMoysha/rust-obs-plugins](https://github.com/TakiMoysha/rust-obs-plugins),
+> which was forked from [bennetthardwick/rust-obs-plugins](https://github.com/bennetthardwick/rust-obs-plugins).
 
-- **`module`**: defining and registering OBS modules (plugins).
-- **`source`**: traits and types for creating sources, filters, and transitions.
-- **`properties`**: API for defining user-configurable properties for sources.
-- **`data`**: wrapper around `obs_data_t` for handling settings and configuration data.
-- **`string`**: utilities for handling OBS-specific strings (`ObsString`).
-- **`log`**: logging utilities to print to the OBS log.
+A safe Rust wrapper around the [OBS Studio](https://github.com/obsproject/obs-studio)
+plugin API for building sources, filters, and effects, plus a small set of
+plugins built on top of it.
 
-> [!note] If you create separate threads, added stop signal in `unload` method.
+> **Status:** the wrapper API is incomplete and may change. Expect breakage.
 
-| Trait                 | Description                                   | Builder Method             |
-| :-------------------- | :-------------------------------------------- | :------------------------- |
-| `GetNameSource`       | Returns the display name of the source.       | `.enable_get_name()`       |
-| `GetWidthSource`      | Returns the width of the source.              | `.enable_get_width()`      |
-| `GetHeightSource`     | Returns the height of the source.             | `.enable_get_height()`     |
-| `VideoRenderSource`   | Handles video rendering.                      | `.enable_video_render()`   |
-| `AudioRenderSource`   | Handles audio rendering.                      | `.enable_audio_render()`   |
-| `UpdateSource`        | Called when settings are updated.             | `.enable_update()`         |
-| `GetPropertiesSource` | Defines properties (settings) for the source. | `.enable_get_properties()` |
-| `GetDefaultsSource`   | Sets default values for settings.             | `.enable_get_defaults()`   |
-| `VideoTickSource`     | Called every video frame.                     | `.enable_video_tick()`     |
-| `ActivateSource`      | Called when the source becomes active.        | `.enable_activate()`       |
-| `DeactivateSource`    | Called when the source becomes inactive.      | `.enable_deactivate()`     |
-| `MouseClickSource`    | Handles mouse clicks.                         | `.enable_mouse_click()`    |
-| `MouseMoveSource`     | Handles mouse movement.                       | `.enable_mouse_move()`     |
-| `MouseWheelSource`    | Handles mouse wheel events.                   | `.enable_mouse_wheel()`    |
-| `KeyClickSource`      | Handles keyboard events.                      | `.enable_key_click()`      |
-| `FocusSource`         | Handles focus events.                         | `.enable_focus()`          |
-| `FilterVideoSource`   | For filters: process video data.              | `.enable_filter_video()`   |
-| `FilterAudioSource`   | For filters: process audio data.              | `.enable_filter_audio()`   |
+## Compatibility
 
-### Property Types (`GetPropertiesSource`)
+| `obs-wrapper` | `obs-sys` | OBS Studio |
+| ------------- | --------- | ---------- |
+| _TBD_         | _TBD_     | _TBD_      |
 
-- **`NumberProp`**: Integer or Float. Can be configured as a slider.
-- **`BoolProp`**: Checkbox.
-- **`TextProp`**: Text input (Default, Password, Multiline).
-- **`ColorProp`**: Color picker.
-- **`PathProp`**: File or directory picker.
-- **`ListProp`**: Dropdown list (via `props.add_list`).
-- **`FontProp`**: Font selection.
-- **`EditableListProp`**: Editable list of strings or files.
+Verified-compatible OBS releases will be filled in as the fork stabilizes.
 
----
+## Repository layout
 
-# Rust OBS Wrapper
-
-[![Build Status](https://travis-ci.org/bennetthardwick/rust-obs-plugins.svg?branch=master)](https://travis-ci.org/bennetthardwick/rust-obs-plugins)
-[![Wrapper Docs](https://docs.rs/obs-wrapper/badge.svg)](https://docs.rs/obs-wrapper)
-
-A safe wrapper around the OBS API, useful for creating OBS sources, filters and effects. The wrapper is quite incomplete and will most likely see dramatic API changes in the future.
-
-This repo also includes plugins creating using the wrapper in the `/plugins` folder.
-
-## Plugins
-
-| Folder                   | Description                                                      |
-| ------------------------ | ---------------------------------------------------------------- |
-| /scroll-focus-filter     | an OBS filter that will zoom into the currently focused X window |
-| /rnnoise-denoiser-filter | an OBS filter for removing background noise from your Mic        |
+| Path                       | Description                                       |
+| -------------------------- | ------------------------------------------------- |
+| `/`                        | `obs-wrapper` — the safe Rust wrapper crate       |
+| `/obs-sys`                 | Raw `bindgen` bindings against `<obs/obs.h>`      |
+| `/plugins/avatar-plugin`   | Renders an avatar driven by keyboard/mouse input  |
+| `/scripts`                 | Python helpers (`obsws-python`) for OBS testing   |
 
 ## Usage
 
-In your `Cargo.toml` file add the following section, substituting `<module-name>` for the name of
-the module:
+Add the wrapper to your plugin crate's `Cargo.toml`, replacing
+`<module-name>` with your plugin's name:
 
 ```toml
 [dependencies]
@@ -77,82 +40,51 @@ name = "<module-name>"
 crate-type = ["cdylib"]
 ```
 
-The process for creating a plugin is:
+The shape of a plugin is:
 
-1. Create a struct that implements Module
-1. Create a struct that will store the plugin state
-1. Implement the required traits for the module
-1. Enable the traits which have been enabled in the module `load` method
+1. Create a struct that implements `Module`.
+2. Create a struct that holds your source/filter state.
+3. Implement the source traits you need.
+4. Enable those traits in the module's `load` method.
 
 ```rust
 use obs_wrapper::{
-    // Everything required for modules
     prelude::*,
-    // Everything required for creating a source
     source::*,
-    // Macro for registering modules
     obs_register_module,
-    // Macro for creating strings
     obs_string,
 };
 
-// The module that will handle creating the source.
 struct TestModule {
-    context: ModuleRef
+    context: ModuleRef,
 }
 
-// The source that will be shown inside OBS.
 struct TestSource;
 
-// Implement the Sourceable trait for TestSource, this is required for each source.
-// It allows you to specify the source ID and type.
 impl Sourceable for TestSource {
-    fn get_id() -> ObsString {
-        obs_string!("test_source")
-    }
-
-    fn get_type() -> SourceType {
-        SourceType::Filter
-    }
-
-    fn create(create: &mut CreatableSourceContext<Self>, source: SourceContext) -> Self {
-        Self
-    }
+    fn get_id() -> ObsString { obs_string!("test_source") }
+    fn get_type() -> SourceType { SourceType::Filter }
+    fn create(_create: &mut CreatableSourceContext<Self>, _source: SourceContext) -> Self { Self }
 }
 
-// Allow OBS to show a name for the source
 impl GetNameSource for TestSource {
-    fn get_name() -> ObsString {
-        obs_string!("Test Source")
-    }
+    fn get_name() -> ObsString { obs_string!("Test Source") }
 }
 
-// Implement the Module trait for TestModule. This will handle the creation of the source and
-// has some methods for telling OBS a bit about itself.
-pub trait Module {
-    fn new(ctx: ModuleRef) -> Self;
-    fn get_ctx(&self) -> &ModuleRef;
-    fn unload(&mut self) {}
-    fn post_load(&mut self) {}
-    // about plugin
-    fn description() -> ObsString;
-    fn name() -> ObsString;
-    fn author() -> ObsString;
+impl Module for TestModule {
+    fn new(context: ModuleRef) -> Self { Self { context } }
+    fn get_ctx(&self) -> &ModuleRef { &self.context }
 
-    // Load the module - create all sources, returning true if all went well.
+    fn description() -> ObsString { obs_string!("A test source") }
+    fn name() -> ObsString { obs_string!("Test Module") }
+    fn author() -> ObsString { obs_string!("you") }
+
     fn load(&mut self, load_context: &mut LoadContext) -> bool {
-        // Create the source
         let source = load_context
             .create_source_builder::<TestSource>()
-            // Since GetNameSource is implemented, this method needs to be called to
-            // enable it.
             .enable_get_name()
             .build();
-
-        // Tell OBS about the source so that it will show it.
         load_context.register_source(source);
-
-        // Nothing could have gone wrong, so return true.
         true
     }
 }
@@ -160,14 +92,91 @@ pub trait Module {
 obs_register_module!(TestModule);
 ```
 
-### Installation
+> If your plugin spawns threads, signal them to stop from the `unload` method.
 
-1. Run `cargo build --release`
-2. Copy `/target/release/<module-name>.so` to your OBS plugins folder (`/usr/lib/obs-plugins/`)
-3. The plugin should be available for use from inside OBS
+### Source traits
+
+Each trait must be enabled on the source builder via the matching
+`.enable_*()` call so OBS sees the corresponding callback.
+
+| Trait                 | Description                                   | Builder method             |
+| :-------------------- | :-------------------------------------------- | :------------------------- |
+| `GetNameSource`       | Display name of the source                    | `.enable_get_name()`       |
+| `GetWidthSource`      | Source width                                  | `.enable_get_width()`      |
+| `GetHeightSource`     | Source height                                 | `.enable_get_height()`     |
+| `VideoRenderSource`   | Video rendering                               | `.enable_video_render()`   |
+| `AudioRenderSource`   | Audio rendering                               | `.enable_audio_render()`   |
+| `UpdateSource`        | Settings updated                              | `.enable_update()`         |
+| `GetPropertiesSource` | Define user-configurable properties           | `.enable_get_properties()` |
+| `GetDefaultsSource`   | Default values for settings                   | `.enable_get_defaults()`   |
+| `VideoTickSource`     | Per-video-frame tick                          | `.enable_video_tick()`     |
+| `ActivateSource`      | Source becomes active                         | `.enable_activate()`       |
+| `DeactivateSource`    | Source becomes inactive                       | `.enable_deactivate()`     |
+| `MouseClickSource`    | Mouse clicks                                  | `.enable_mouse_click()`    |
+| `MouseMoveSource`     | Mouse movement                                | `.enable_mouse_move()`     |
+| `MouseWheelSource`    | Mouse wheel                                   | `.enable_mouse_wheel()`    |
+| `KeyClickSource`      | Keyboard events                               | `.enable_key_click()`      |
+| `FocusSource`         | Focus changes                                 | `.enable_focus()`          |
+| `FilterVideoSource`   | Filter: process video data                    | `.enable_filter_video()`   |
+| `FilterAudioSource`   | Filter: process audio data                    | `.enable_filter_audio()`   |
+
+### Property types (`GetPropertiesSource`)
+
+- `NumberProp` — integer or float; can render as a slider.
+- `BoolProp` — checkbox.
+- `TextProp` — text input (default, password, multiline).
+- `ColorProp` — color picker.
+- `PathProp` — file or directory picker.
+- `ListProp` — dropdown (via `props.add_list`).
+- `FontProp` — font selection.
+- `EditableListProp` — editable list of strings or files.
+
+### Logging
+
+Use `obs_wrapper::log` rather than `println!` so output lands in the OBS
+log:
+
+```rust
+obs_wrapper::log::info!("audio level: {}", self.audio_level);
+```
+
+## Building and installing a plugin
+
+```sh
+cargo build --release
+```
+
+Then copy the resulting shared library into OBS's plugins directory:
+
+| Platform | Library      | Install location                    |
+| -------- | ------------ | ----------------------------------- |
+| Linux    | `*.so`       | `/usr/lib/obs-plugins/`             |
+| macOS    | `*.dylib`    | `~/Library/Application Support/obs-studio/plugins/` |
+| Windows  | `*.dll`      | `%PROGRAMFILES%\obs-studio\obs-plugins\64bit\` |
+
+Plugin paths vary by OBS install method (Flatpak, Snap, portable, etc.) —
+check your install for the right location.
+
+## Development
+
+The repo ships a Nix flake with the rust toolchain, `libclang` for
+`obs-sys` bindgen, and `obs-studio` for headers and linking:
+
+```sh
+cp .envrc.template .envrc   # if you use direnv
+direnv allow                # or: nix develop
+```
+
+The flake points `BINDGEN_EXTRA_CLANG_ARGS` at nixpkgs' OBS headers, so
+you do **not** need to check out the `obs-sys/obs` submodule for local
+development. If you do want headers from a specific upstream OBS:
+
+```sh
+git submodule update --init --recursive
+git submodule update --remote obs-sys/obs   # bump pinned OBS
+```
 
 ## License
 
-Like [obs-studio](https://github.com/obsproject/obs-studio), `obs-wrapper` is licensed under GNU General Public License v2.0.
-
-See [LICENSE](./LICENSE) for details.
+Like [obs-studio](https://github.com/obsproject/obs-studio), this
+project is licensed under GPL-2.0. See [LICENSE](./LICENSE).
