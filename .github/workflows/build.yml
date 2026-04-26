@@ -54,6 +54,9 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
+      - name: Load dev shell
+        run: nix develop .#obs-v32 --command true
+
       - run: nix develop .#obs-v32 --command bash -c 'cargo clippy --workspace --all-targets --no-deps -- -D warnings'
 
   build_linux:
@@ -78,6 +81,9 @@ jobs:
             accept-flake-config = true
 
       - uses: Swatinem/rust-cache@v2
+
+      - name: Load dev shell
+        run: nix develop .#obs-v${{ matrix.obs }} --command true
 
       - name: build
         run: |
@@ -125,6 +131,9 @@ jobs:
             accept-flake-config = true
 
       - uses: Swatinem/rust-cache@v2
+
+      - name: Load dev shell
+        run: nix develop .#obs-v${{ matrix.obs }} --command true
 
       - name: install OBS ${{ matrix.obs_full_version }}
         run: |
