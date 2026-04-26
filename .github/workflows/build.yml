@@ -132,8 +132,24 @@ jobs:
           esac
           url="https://github.com/obsproject/obs-studio/releases/download/${{ matrix.obs_full_version }}/obs-studio-${{ matrix.obs_full_version }}-${suffix}"
           curl -L -o /tmp/obs.dmg "$url"
-          mount_point="$(hdiutil attach -nobrowse /tmp/obs.dmg | tail -1 | awk '{print $3}')"
-          sudo cp -R "$mount_point/OBS.app" /Applications/
+          # Parse hdiutil's plist output rather than scraping the human-readable
+          # table — volume names sometimes contain spaces ("OBS Studio") which
+          # broke the previous awk-based parser, and the .app inside isn't
+          # always named "OBS.app" verbatim across releases.
+          mount_point="$(
+            hdiutil attach -nobrowse -plist /tmp/obs.dmg \
+              | python3 -c 'import plistlib, sys
+for e in plistlib.loads(sys.stdin.buffer.read())["system-entities"]:
+    if "mount-point" in e:
+        print(e["mount-point"]); break'
+          )"
+          app_path="$(find "$mount_point" -maxdepth 2 -name '*.app' -type d -print -quit)"
+          if [ -z "$app_path" ]; then
+            echo "no .app bundle found in $mount_point — contents:"
+            ls -la "$mount_point"
+            exit 1
+          fi
+          sudo cp -R "$app_path" /Applications/OBS.app
           hdiutil detach "$mount_point"
 
       - run: cargo build --verbose --workspace --exclude scroll-focus-filter --no-default-features --features obs-${{ matrix.obs }}
