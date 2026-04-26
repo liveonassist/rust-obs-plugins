@@ -132,25 +132,21 @@ jobs:
           esac
           url="https://github.com/obsproject/obs-studio/releases/download/${{ matrix.obs_full_version }}/obs-studio-${{ matrix.obs_full_version }}-${suffix}"
           curl -L -o /tmp/obs.dmg "$url"
-          # Parse hdiutil's plist output rather than scraping the human-readable
-          # table — volume names sometimes contain spaces ("OBS Studio") which
-          # broke the previous awk-based parser, and the .app inside isn't
-          # always named "OBS.app" verbatim across releases.
-          mount_point="$(
-            hdiutil attach -nobrowse -plist /tmp/obs.dmg \
-              | python3 -c 'import plistlib, sys
-for e in plistlib.loads(sys.stdin.buffer.read())["system-entities"]:
-    if "mount-point" in e:
-        print(e["mount-point"]); break'
-          )"
-          app_path="$(find "$mount_point" -maxdepth 2 -name '*.app' -type d -print -quit)"
+          # Mount at a fixed path so we don't have to parse hdiutil's output
+          # back out (the previous version mis-handled volume names that
+          # contain spaces). Then glob for whatever .app the DMG ships —
+          # release naming has varied between "OBS.app" and "OBS Studio.app".
+          mount_dir="$(mktemp -d)"
+          hdiutil attach -nobrowse -mountpoint "$mount_dir" /tmp/obs.dmg
+          app_path="$(find "$mount_dir" -maxdepth 2 -name '*.app' -type d -print -quit)"
           if [ -z "$app_path" ]; then
-            echo "no .app bundle found in $mount_point — contents:"
-            ls -la "$mount_point"
+            echo "no .app bundle found in $mount_dir — contents:"
+            ls -la "$mount_dir"
+            hdiutil detach "$mount_dir"
             exit 1
           fi
           sudo cp -R "$app_path" /Applications/OBS.app
-          hdiutil detach "$mount_point"
+          hdiutil detach "$mount_dir"
 
       - run: cargo build --verbose --workspace --exclude scroll-focus-filter --no-default-features --features obs-${{ matrix.obs }}
         env:
