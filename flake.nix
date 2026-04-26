@@ -3,6 +3,9 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Track obs-studio from nixpkgs master so we can pick up new OBS
+    # releases ahead of the nixos-unstable channel cadence.
+    nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     flake-utils.url = "github:numtide/flake-utils";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
@@ -13,6 +16,7 @@
   outputs = {
     self,
     nixpkgs,
+    nixpkgs-master,
     flake-utils,
     rust-overlay,
   }:
@@ -23,6 +27,13 @@
           inherit system overlays;
           config.allowUnfree = true;
         };
+        pkgsMaster = import nixpkgs-master {
+          inherit system;
+          config.allowUnfree = true;
+        };
+
+        # obs-studio pulled from nixpkgs master to stay close to upstream.
+        obs-studio = pkgsMaster.obs-studio;
 
         # Rust 2024 edition requires >= 1.85.
         rustToolchain = pkgs.rust-bin.stable.latest.default.override {
@@ -69,7 +80,7 @@
             echo "  - 🐍 Python: $(python --version 2>/dev/null || echo 'not found')"
             echo ""
             echo "OBS:"
-            echo "  - 🔗 Linking against obs-studio ${pkgs.obs-studio.version} (from nixpkgs)"
+            echo "  - 🔗 Linking against obs-studio ${obs-studio.version} (from nixpkgs-master)"
             if [ -f obs-sys/obs/libobs/obs.h ]; then
               submodule_rev="$(git -C obs-sys/obs rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
               echo "  - 📌 Headers from obs-sys/obs submodule @ $submodule_rev"
