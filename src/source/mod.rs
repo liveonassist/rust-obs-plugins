@@ -2,6 +2,7 @@ use paste::item;
 
 pub mod context;
 mod ffi;
+pub mod push;
 pub mod scene;
 pub mod traits;
 
@@ -12,10 +13,12 @@ use crate::{
 };
 
 pub use context::*;
+pub use push::*;
 pub use traits::*;
 
 use obs_rs_sys::{
-    OBS_SOURCE_AUDIO, OBS_SOURCE_CONTROLLABLE_MEDIA, OBS_SOURCE_INTERACTION, OBS_SOURCE_VIDEO,
+    OBS_SOURCE_ASYNC_VIDEO, OBS_SOURCE_AUDIO, OBS_SOURCE_CONTROLLABLE_MEDIA,
+    OBS_SOURCE_INTERACTION, OBS_SOURCE_VIDEO,
     obs_filter_get_target, obs_icon_type, obs_icon_type_OBS_ICON_TYPE_AUDIO_INPUT,
     obs_icon_type_OBS_ICON_TYPE_AUDIO_OUTPUT, obs_icon_type_OBS_ICON_TYPE_BROWSER,
     obs_icon_type_OBS_ICON_TYPE_CAMERA, obs_icon_type_OBS_ICON_TYPE_COLOR,
@@ -407,6 +410,24 @@ impl<D: Sourceable> SourceInfoBuilder<D> {
 
     pub fn with_icon(mut self, icon: Icon) -> Self {
         self.info.icon_type = icon.into();
+        self
+    }
+
+    /// Mark this source as an asynchronous video input (sets
+    /// `OBS_SOURCE_ASYNC_VIDEO`). Required to use
+    /// [`SourceRef::as_async_video`] and push frames via
+    /// [`AsyncVideoSource::output_video`]. Async sources must NOT also
+    /// implement `VideoRenderSource`.
+    pub fn enable_async_video(mut self) -> Self {
+        self.info.output_flags |= OBS_SOURCE_ASYNC_VIDEO;
+        self
+    }
+
+    /// Mark this source as an audio input (sets `OBS_SOURCE_AUDIO`). Required
+    /// to use [`SourceRef::as_async_audio`] and push samples via
+    /// [`AsyncAudioSource::output_audio`].
+    pub fn enable_async_audio(mut self) -> Self {
+        self.info.output_flags |= OBS_SOURCE_AUDIO;
         self
     }
 }
