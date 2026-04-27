@@ -82,7 +82,11 @@ impl OutputRef {
             if id.is_null() {
                 types.push(String::new())
             } else {
-                types.push(unsafe { CStr::from_ptr(id) }.to_str().unwrap().to_string())
+                types.push(
+                    unsafe { CStr::from_ptr(id) }
+                        .to_string_lossy()
+                        .into_owned(),
+                )
             }
         }
         types

@@ -1,5 +1,6 @@
 use super::{CreatableOutputContext, OutputRef, traits::*};
 use crate::hotkey::{Hotkey, HotkeyCallbacks};
+use crate::string::DisplayExt as _;
 use crate::{data::DataObj, wrapper::PtrWrapper};
 use obs_rs_sys::{
     audio_data, encoder_packet, obs_hotkey_id, obs_hotkey_register_output, obs_hotkey_t,
@@ -54,9 +55,22 @@ pub unsafe extern "C" fn create<D: Outputable>(
     output: *mut obs_output_t,
 ) -> *mut c_void {
     // this is later forgotten
-    let settings = DataObj::from_raw_unchecked(settings).unwrap();
+    let Some(settings) = DataObj::from_raw_unchecked(settings) else {
+        log::error!(
+            "obs handed null settings to output::create for `{}`; aborting create",
+            D::get_id().display()
+        );
+        return std::ptr::null_mut();
+    };
     let mut context = CreatableOutputContext::from_raw(settings);
-    let output_context = OutputRef::from_raw(output).expect("create");
+    let Some(output_context) = OutputRef::from_raw(output) else {
+        log::error!(
+            "obs handed null obs_output_t to output::create for `{}`; aborting create",
+            D::get_id().display()
+        );
+        forget(context.settings);
+        return std::ptr::null_mut();
+    };
 
     let data = D::create(&mut context, output_context);
     let wrapper = Box::new(DataWrapper::from(data));
@@ -65,10 +79,8 @@ pub unsafe extern "C" fn create<D: Outputable>(
 
     let pointer = Box::into_raw(wrapper);
 
-    pointer
-        .as_mut()
-        .unwrap()
-        .register_callbacks(callbacks, output, pointer as *mut c_void);
+    // SAFETY: `pointer` came from `Box::into_raw` and is non-null.
+    (*pointer).register_callbacks(callbacks, output, pointer as *mut c_void);
 
     pointer as *mut c_void
 }
@@ -131,14 +143,20 @@ pub unsafe extern "C" fn encoded_packet<D: EncodedPacketOutput>(
 pub unsafe extern "C" fn update<D: UpdateOutput>(data: *mut c_void, settings: *mut obs_data_t) {
     let data: &mut DataWrapper<D> = &mut *(data as *mut DataWrapper<D>);
     // this is later forgotten
-    let mut settings = DataObj::from_raw_unchecked(settings).unwrap();
+    let Some(mut settings) = DataObj::from_raw_unchecked(settings) else {
+        log::error!("obs handed null settings to output::update; skipping");
+        return;
+    };
     D::update(&mut data.data, &mut settings);
     forget(settings);
 }
 
 pub unsafe extern "C" fn get_defaults<D: GetDefaultsOutput>(settings: *mut obs_data_t) {
     // this is later forgotten
-    let mut settings = DataObj::from_raw_unchecked(settings).unwrap();
+    let Some(mut settings) = DataObj::from_raw_unchecked(settings) else {
+        log::error!("obs handed null settings to output::get_defaults; skipping");
+        return;
+    };
     D::get_defaults(&mut settings);
     forget(settings);
 }

@@ -5,6 +5,7 @@ use crate::media::{audio::AudioDataContext, video::VideoDataSourceContext};
 use crate::{
     data::DataObj,
     hotkey::{Hotkey, HotkeyCallbacks},
+    string::DisplayExt as _,
     wrapper::PtrWrapper,
 };
 use paste::item;
@@ -88,9 +89,22 @@ pub unsafe extern "C" fn create<D: Sourceable>(
 ) -> *mut c_void {
     let mut global = GlobalContext;
     // this is later forgotten
-    let settings = DataObj::from_raw_unchecked(settings).unwrap();
+    let Some(settings) = DataObj::from_raw_unchecked(settings) else {
+        log::error!(
+            "obs handed null settings to source::create for `{}`; aborting create",
+            D::get_id().display()
+        );
+        return std::ptr::null_mut();
+    };
     let mut context = CreatableSourceContext::from_raw(settings, &mut global);
-    let source_context = SourceRef::from_raw(source).expect("create");
+    let Some(source_context) = SourceRef::from_raw(source) else {
+        log::error!(
+            "obs handed null obs_source_t to source::create for `{}`; aborting create",
+            D::get_id().display()
+        );
+        forget(context.settings);
+        return std::ptr::null_mut();
+    };
 
     let data = D::create(&mut context, source_context);
 
@@ -100,10 +114,8 @@ pub unsafe extern "C" fn create<D: Sourceable>(
 
     let pointer = Box::into_raw(Box::new(wrapper));
 
-    pointer
-        .as_mut()
-        .unwrap()
-        .register_callbacks(callbacks, source, pointer as *mut c_void);
+    // SAFETY: `pointer` came from `Box::into_raw` and is non-null.
+    (*pointer).register_callbacks(callbacks, source, pointer as *mut c_void);
 
     pointer as *mut c_void
 }
@@ -116,7 +128,10 @@ pub unsafe extern "C" fn destroy<D>(data: *mut c_void) {
 pub unsafe extern "C" fn update<D: UpdateSource>(data: *mut c_void, settings: *mut obs_data_t) {
     let mut global = GlobalContext;
     let data: &mut DataWrapper<D> = &mut *(data as *mut DataWrapper<D>);
-    let mut settings = DataObj::from_raw_unchecked(settings).unwrap();
+    let Some(mut settings) = DataObj::from_raw_unchecked(settings) else {
+        log::error!("obs handed null settings to source::update; skipping");
+        return;
+    };
     D::update(&mut data.data, &mut settings, &mut global);
     forget(settings);
 }
@@ -254,7 +269,10 @@ impl_media!(
 
 pub unsafe extern "C" fn get_defaults<D: GetDefaultsSource>(settings: *mut obs_data_t) {
     // this is later forgotten
-    let mut settings = DataObj::from_raw_unchecked(settings).unwrap();
+    let Some(mut settings) = DataObj::from_raw_unchecked(settings) else {
+        log::error!("obs handed null settings to source::get_defaults; skipping");
+        return;
+    };
     D::get_defaults(&mut settings);
     forget(settings);
 }
@@ -284,10 +302,17 @@ pub unsafe extern "C" fn mouse_click<D: MouseClickSource>(
     click_count: u32,
 ) {
     let wrapper = &mut *(data as *mut DataWrapper<D>);
+    let button = match super::MouseButton::try_from(type_ as obs_button_type) {
+        Ok(b) => b,
+        Err(_) => {
+            log::warn!("obs sent unknown mouse button type {type_}; dropping click");
+            return;
+        }
+    };
     D::mouse_click(
         &mut wrapper.data,
         *event,
-        super::MouseButton::try_from(type_ as obs_button_type).unwrap(),
+        button,
         !mouse_up,
         click_count as u8,
     )
