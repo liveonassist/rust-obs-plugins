@@ -16,10 +16,15 @@ repository = "https://github.com/TakiMoysha/rust-obs-plugins"
 members = ["obs-rs-sys", "plugins/*"]
 
 [features]
-default = ["obs-32"]
+default = ["obs-32", "frontend-api"]
 obs-30 = ["obs-rs-sys/obs-30"]
 obs-31 = ["obs-rs-sys/obs-31"]
 obs-32 = ["obs-rs-sys/obs-32"]
+# Wraps `obs-frontend-api`, OBS Studio's UI-side plugin API. The C library
+# is already linked unconditionally by `obs-rs-sys`; this feature toggles
+# the Rust wrappers, not the link line. Disable to shrink compile time when
+# building plugins that only touch the source / output APIs.
+frontend-api = []
 
 [dependencies]
 obs-rs-sys = { path = "./obs-rs-sys", version = "0.4.0-tm", default-features = false }
