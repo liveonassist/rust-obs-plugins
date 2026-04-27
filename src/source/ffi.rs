@@ -58,7 +58,7 @@ impl<D> From<D> for DataWrapper<D> {
     }
 }
 
-macro_rules! impl_simple_fn {
+macro_rules! impl_simple_fn_mut {
     ($($name:ident => $trait:ident $(-> $ret:ty)?)*) => ($(
         item! {
             pub unsafe extern "C" fn $name<D: $trait>(
@@ -71,14 +71,29 @@ macro_rules! impl_simple_fn {
     )*)
 }
 
+macro_rules! impl_simple_fn_ref {
+    ($($name:ident => $trait:ident $(-> $ret:ty)?)*) => ($(
+        item! {
+            pub unsafe extern "C" fn $name<D: $trait>(
+                data: *mut std::os::raw::c_void,
+            ) $(-> $ret)? {
+                let wrapper = &*(data as *const DataWrapper<D>);
+                D::$name(&wrapper.data)
+            }
+        }
+    )*)
+}
+
 pub unsafe extern "C" fn get_name<D: GetNameSource>(_type_data: *mut c_void) -> *const c_char {
     D::get_name().as_ptr()
 }
 
-impl_simple_fn!(
+impl_simple_fn_ref!(
     get_width => GetWidthSource -> u32
     get_height => GetHeightSource -> u32
+);
 
+impl_simple_fn_mut!(
     activate => ActivateSource
     deactivate => DeactivateSource
 );
@@ -164,8 +179,8 @@ pub unsafe extern "C" fn audio_render<D: AudioRenderSource>(
 pub unsafe extern "C" fn get_properties<D: GetPropertiesSource>(
     data: *mut std::os::raw::c_void,
 ) -> *mut obs_properties {
-    let wrapper: &mut DataWrapper<D> = &mut *(data as *mut DataWrapper<D>);
-    let properties = D::get_properties(&mut wrapper.data);
+    let wrapper: &DataWrapper<D> = &*(data as *const DataWrapper<D>);
+    let properties = D::get_properties(&wrapper.data);
     properties.into_raw()
 }
 
@@ -189,7 +204,7 @@ pub unsafe extern "C" fn enum_all_sources<D: EnumAllSource>(
     D::enum_all_sources(&mut wrapper.data, &context);
 }
 
-impl_simple_fn!(
+impl_simple_fn_mut!(
     transition_start => TransitionStartSource
     transition_stop => TransitionStopSource
 );
@@ -233,8 +248,8 @@ pub unsafe extern "C" fn media_play_pause<D: MediaPlayPauseSource>(
 pub unsafe extern "C" fn media_get_state<D: MediaGetStateSource>(
     data: *mut std::os::raw::c_void,
 ) -> obs_media_state {
-    let wrapper = &mut *(data as *mut DataWrapper<D>);
-    D::get_state(&mut wrapper.data).as_raw()
+    let wrapper = &*(data as *const DataWrapper<D>);
+    D::get_state(&wrapper.data).as_raw()
 }
 
 pub unsafe extern "C" fn media_set_time<D: MediaSetTimeSource>(
@@ -245,7 +260,7 @@ pub unsafe extern "C" fn media_set_time<D: MediaSetTimeSource>(
     D::set_time(&mut wrapper.data, milliseconds);
 }
 
-macro_rules! impl_media {
+macro_rules! impl_media_mut {
     ($($name:ident => $trait:ident $(-> $ret:ty)?)*) => ($(
         item! {
             pub unsafe extern "C" fn [<media_$name>]<D: $trait>(
@@ -258,11 +273,27 @@ macro_rules! impl_media {
     )*)
 }
 
-impl_media!(
+macro_rules! impl_media_ref {
+    ($($name:ident => $trait:ident $(-> $ret:ty)?)*) => ($(
+        item! {
+            pub unsafe extern "C" fn [<media_$name>]<D: $trait>(
+                data: *mut std::os::raw::c_void,
+            ) $(-> $ret)? {
+                let wrapper = &*(data as *const DataWrapper<D>);
+                D::$name(&wrapper.data)
+            }
+        }
+    )*)
+}
+
+impl_media_mut!(
     stop => MediaStopSource
     restart => MediaRestartSource
     next => MediaNextSource
     previous => MediaPreviousSource
+);
+
+impl_media_ref!(
     get_duration => MediaGetDurationSource -> i64
     get_time => MediaGetTimeSource -> i64
 );

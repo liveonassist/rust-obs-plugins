@@ -18,14 +18,6 @@ pub trait GetNameOutput {
     fn get_name() -> ObsString;
 }
 
-macro_rules! simple_trait {
-    ($($f:ident$(($($params:tt)*))? => $t:ident $(-> $ret:ty)?)*) => ($(
-        pub trait $t: Sized {
-            fn $f(&mut self $(, $($params)*)?) $(-> $ret)?;
-        }
-    )*)
-}
-
 pub trait RawVideoOutput: Sized {
     fn raw_video(&mut self, frame: &mut video_data);
 }
@@ -51,10 +43,18 @@ pub trait GetDefaultsOutput {
 }
 
 pub trait GetPropertiesOutput: Sized {
-    fn get_properties(&mut self) -> Properties;
+    fn get_properties(&self) -> Properties;
 }
 
-simple_trait! {
+macro_rules! simple_trait_ref {
+    ($($f:ident$(($($params:tt)*))? => $t:ident $(-> $ret:ty)?)*) => ($(
+        pub trait $t: Sized {
+            fn $f(&self $(, $($params)*)?) $(-> $ret)?;
+        }
+    )*)
+}
+
+simple_trait_ref! {
     get_total_bytes => GetTotalBytesOutput -> u64
     get_dropped_frames => GetDroppedFramesOutput-> i32
     get_congestion => GetCongestionOutput -> f32

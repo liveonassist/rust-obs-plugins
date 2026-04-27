@@ -90,7 +90,7 @@ pub unsafe extern "C" fn destroy<D>(data: *mut c_void) {
     drop(wrapper);
 }
 
-macro_rules! impl_simple_fn {
+macro_rules! impl_simple_fn_mut {
     ($($name:ident$(($($params_name:tt:$params_ty:ty),*))? => $trait:ident $(-> $ret:ty)?)*) => ($(
         item! {
             pub unsafe extern "C" fn $name<D: $trait>(
@@ -104,11 +104,25 @@ macro_rules! impl_simple_fn {
     )*)
 }
 
+macro_rules! impl_simple_fn_ref {
+    ($($name:ident$(($($params_name:tt:$params_ty:ty),*))? => $trait:ident $(-> $ret:ty)?)*) => ($(
+        item! {
+            pub unsafe extern "C" fn $name<D: $trait>(
+                data: *mut ::std::os::raw::c_void,
+                $($($params_name:$params_ty),*)?
+            ) $(-> $ret)? {
+                let wrapper = &*(data as *const DataWrapper<D>);
+                D::$name(&wrapper.data $(,$($params_name),*)?)
+            }
+        }
+    )*)
+}
+
 pub unsafe extern "C" fn get_name<D: GetNameOutput>(_type_data: *mut c_void) -> *const c_char {
     D::get_name().as_ptr()
 }
 
-impl_simple_fn! {
+impl_simple_fn_mut! {
     start => Outputable -> bool
     stop(ts: u64) => Outputable
 }
@@ -173,12 +187,12 @@ pub unsafe extern "C" fn get_defaults<D: GetDefaultsOutput>(settings: *mut obs_d
 pub unsafe extern "C" fn get_properties<D: GetPropertiesOutput>(
     data: *mut ::std::os::raw::c_void,
 ) -> *mut obs_properties {
-    let wrapper: &mut DataWrapper<D> = &mut *(data as *mut DataWrapper<D>);
-    let properties = D::get_properties(&mut wrapper.data);
+    let wrapper: &DataWrapper<D> = &*(data as *const DataWrapper<D>);
+    let properties = D::get_properties(&wrapper.data);
     properties.into_raw()
 }
 
-impl_simple_fn! {
+impl_simple_fn_ref! {
     get_total_bytes => GetTotalBytesOutput -> u64
     get_dropped_frames => GetDroppedFramesOutput-> c_int
     get_congestion => GetCongestionOutput -> f32

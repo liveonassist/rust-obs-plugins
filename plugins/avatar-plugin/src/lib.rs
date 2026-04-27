@@ -257,19 +257,19 @@ impl GetNameSource for AvatarSource {
 }
 
 impl GetWidthSource for AvatarSource {
-    fn get_width(&mut self) -> u32 {
+    fn get_width(&self) -> u32 {
         self.width
     }
 }
 
 impl GetHeightSource for AvatarSource {
-    fn get_height(&mut self) -> u32 {
+    fn get_height(&self) -> u32 {
         self.height
     }
 }
 
 impl GetPropertiesSource for AvatarSource {
-    fn get_properties(&mut self) -> Properties {
+    fn get_properties(&self) -> Properties {
         let mut properties = Properties::new();
 
         // Path to avatar config.json

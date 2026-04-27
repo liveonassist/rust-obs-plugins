@@ -14,10 +14,18 @@ pub trait Sourceable: Sized {
     fn create(create: &mut CreatableSourceContext<Self>, source: SourceRef) -> Self;
 }
 
-macro_rules! simple_trait {
+macro_rules! simple_trait_mut {
     ($($f:ident => $t:ident $(-> $ret:ty)?)*) => ($(
         pub trait $t: Sized {
             fn $f(&mut self) $(-> $ret)?;
+        }
+    )*)
+}
+
+macro_rules! simple_trait_ref {
+    ($($f:ident => $t:ident $(-> $ret:ty)?)*) => ($(
+        pub trait $t: Sized {
+            fn $f(&self) $(-> $ret)?;
         }
     )*)
 }
@@ -26,9 +34,12 @@ pub trait GetNameSource {
     fn get_name() -> ObsString;
 }
 
-simple_trait!(
+simple_trait_ref!(
     get_width => GetWidthSource -> u32
     get_height => GetHeightSource -> u32
+);
+
+simple_trait_mut!(
     activate => ActivateSource
     deactivate => DeactivateSource
 );
@@ -72,7 +83,7 @@ pub trait AudioRenderSource: Sized {
 }
 
 pub trait GetPropertiesSource: Sized {
-    fn get_properties(&mut self) -> Properties;
+    fn get_properties(&self) -> Properties;
 }
 
 pub trait VideoTickSource: Sized {
@@ -87,7 +98,7 @@ pub trait EnumAllSource: Sized {
     fn enum_all_sources(&mut self, context: &EnumAllContext);
 }
 
-simple_trait!(
+simple_trait_mut!(
     transition_start => TransitionStartSource
     transition_stop => TransitionStopSource
 );
@@ -105,7 +116,7 @@ pub trait MediaPlayPauseSource: Sized {
 }
 
 pub trait MediaGetStateSource: Sized {
-    fn get_state(&mut self) -> MediaState;
+    fn get_state(&self) -> MediaState;
 }
 
 pub trait MediaSetTimeSource: Sized {
@@ -116,11 +127,14 @@ pub trait GetDefaultsSource {
     fn get_defaults(settings: &mut DataObj);
 }
 
-simple_trait!(
+simple_trait_mut!(
     restart => MediaRestartSource
     stop => MediaStopSource
     next => MediaNextSource
     previous => MediaPreviousSource
+);
+
+simple_trait_ref!(
     get_duration => MediaGetDurationSource -> i64
     get_time => MediaGetTimeSource -> i64
 );
