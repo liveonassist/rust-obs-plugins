@@ -68,9 +68,8 @@ use obs_rs_sys::{
     obs_frontend_get_current_profile, obs_frontend_get_current_profile_path,
     obs_frontend_get_current_record_output_path, obs_frontend_get_current_scene,
     obs_frontend_get_current_scene_collection, obs_frontend_get_current_transition,
-    obs_frontend_get_global_config, obs_frontend_get_last_recording,
-    obs_frontend_get_last_replay, obs_frontend_get_last_screenshot,
-    obs_frontend_get_locale_string, obs_frontend_get_main_window,
+    obs_frontend_get_global_config, obs_frontend_get_last_recording, obs_frontend_get_last_replay,
+    obs_frontend_get_last_screenshot, obs_frontend_get_locale_string, obs_frontend_get_main_window,
     obs_frontend_get_main_window_handle, obs_frontend_get_profile_config,
     obs_frontend_get_recording_output, obs_frontend_get_replay_buffer_output,
     obs_frontend_get_streaming_output, obs_frontend_get_streaming_service,
@@ -81,12 +80,12 @@ use obs_rs_sys::{
     obs_frontend_open_source_interaction, obs_frontend_open_source_properties,
     obs_frontend_pop_ui_translation, obs_frontend_preview_enabled,
     obs_frontend_preview_program_mode_active, obs_frontend_preview_program_trigger_transition,
-    obs_frontend_recording_active, obs_frontend_recording_add_chapter, obs_frontend_recording_pause,
-    obs_frontend_recording_paused, obs_frontend_recording_split_file, obs_frontend_recording_start,
-    obs_frontend_recording_stop, obs_frontend_release_tbar, obs_frontend_replay_buffer_active,
-    obs_frontend_replay_buffer_save, obs_frontend_replay_buffer_start,
-    obs_frontend_replay_buffer_stop, obs_frontend_reset_video, obs_frontend_save,
-    obs_frontend_save_streaming_service, obs_frontend_set_current_preview_scene,
+    obs_frontend_recording_active, obs_frontend_recording_add_chapter,
+    obs_frontend_recording_pause, obs_frontend_recording_paused, obs_frontend_recording_split_file,
+    obs_frontend_recording_start, obs_frontend_recording_stop, obs_frontend_release_tbar,
+    obs_frontend_replay_buffer_active, obs_frontend_replay_buffer_save,
+    obs_frontend_replay_buffer_start, obs_frontend_replay_buffer_stop, obs_frontend_reset_video,
+    obs_frontend_save, obs_frontend_save_streaming_service, obs_frontend_set_current_preview_scene,
     obs_frontend_set_current_profile, obs_frontend_set_current_scene,
     obs_frontend_set_current_scene_collection, obs_frontend_set_current_transition,
     obs_frontend_set_preview_enabled, obs_frontend_set_preview_program_mode,
@@ -108,9 +107,9 @@ mod qt;
 #[cfg(any(feature = "obs-31", feature = "obs-32"))]
 mod canvas;
 
+pub use callbacks::*;
 #[cfg(any(feature = "obs-31", feature = "obs-32"))]
 pub use canvas::*;
-pub use callbacks::*;
 pub use event::*;
 pub use lists::*;
 pub use qt::*;
@@ -615,7 +614,12 @@ pub fn open_projector(
     let geom = CString::new(geometry)?;
     let name = CString::new(name)?;
     unsafe {
-        obs_frontend_open_projector(kind.as_ptr(), monitor as c_int, geom.as_ptr(), name.as_ptr())
+        obs_frontend_open_projector(
+            kind.as_ptr(),
+            monitor as c_int,
+            geom.as_ptr(),
+            name.as_ptr(),
+        )
     };
     Ok(())
 }
@@ -658,7 +662,11 @@ pub fn locale_string(key: &str) -> Option<String> {
     if ptr.is_null() {
         None
     } else {
-        Some(unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned())
+        Some(
+            unsafe { CStr::from_ptr(ptr) }
+                .to_string_lossy()
+                .into_owned(),
+        )
     }
 }
 

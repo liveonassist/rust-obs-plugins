@@ -1,4 +1,6 @@
-use obs_rs_sys::{audio_output_get_channels, audio_output_get_sample_rate, audio_t, obs_audio_data};
+use obs_rs_sys::{
+    audio_output_get_channels, audio_output_get_sample_rate, audio_t, obs_audio_data,
+};
 
 pub struct AudioDataContext {
     pointer: *mut obs_audio_data,

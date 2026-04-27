@@ -69,8 +69,7 @@ use obs_rs_sys::{
     obs_frontend_event_OBS_FRONTEND_EVENT_TRANSITION_LIST_CHANGED,
     obs_frontend_event_OBS_FRONTEND_EVENT_TRANSITION_STOPPED,
     obs_frontend_event_OBS_FRONTEND_EVENT_VIRTUALCAM_STARTED,
-    obs_frontend_event_OBS_FRONTEND_EVENT_VIRTUALCAM_STOPPED,
-    obs_frontend_remove_event_callback,
+    obs_frontend_event_OBS_FRONTEND_EVENT_VIRTUALCAM_STOPPED, obs_frontend_remove_event_callback,
 };
 
 #[cfg(feature = "obs-32")]

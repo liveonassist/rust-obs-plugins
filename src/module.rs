@@ -87,7 +87,9 @@ macro_rules! obs_register_module {
 
         #[allow(missing_safety_doc)]
         #[unsafe(no_mangle)]
-        pub unsafe extern "C" fn obs_module_set_pointer(raw: *mut $crate::obs_rs_sys::obs_module_t) {
+        pub unsafe extern "C" fn obs_module_set_pointer(
+            raw: *mut $crate::obs_rs_sys::obs_module_t,
+        ) {
             OBS_MODULE = ModuleRef::from_raw(raw).ok().map(<$t>::new);
         }
 

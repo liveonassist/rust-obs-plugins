@@ -134,6 +134,13 @@ pub use obs_rs_sys;
 pub mod wrapper;
 /// `obs_data_t` handling
 pub mod data;
+/// OBS Studio frontend API — UI-side controls for streaming, recording,
+/// scenes, transitions, profiles, save/load callbacks, etc.
+///
+/// Available only when running inside OBS Studio (the `obs-frontend-api`
+/// shared library is loaded by the application, not by `libobs`).
+#[cfg(feature = "frontend-api")]
+pub mod frontend;
 /// Tools required for manipulating graphics in OBS
 pub mod graphics;
 mod hotkey;
@@ -145,13 +152,6 @@ pub mod media;
 pub mod module;
 /// Tools for creating outputs
 pub mod output;
-/// OBS Studio frontend API — UI-side controls for streaming, recording,
-/// scenes, transitions, profiles, save/load callbacks, etc.
-///
-/// Available only when running inside OBS Studio (the `obs-frontend-api`
-/// shared library is loaded by the application, not by `libobs`).
-#[cfg(feature = "frontend-api")]
-pub mod frontend;
 /// Tools for creating properties
 pub mod properties;
 /// Error handling

@@ -8,7 +8,8 @@ use std::os::raw::c_void;
 
 use obs_rs_sys::{
     bfree, obs_canvas_get_ref, obs_canvas_release, obs_canvas_t, obs_frontend_add_canvas,
-    obs_frontend_canvas_list, obs_frontend_get_canvases, obs_frontend_remove_canvas, obs_video_info,
+    obs_frontend_canvas_list, obs_frontend_get_canvases, obs_frontend_remove_canvas,
+    obs_video_info,
 };
 
 use crate::wrapper::PtrWrapper;

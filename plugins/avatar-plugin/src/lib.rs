@@ -1,4 +1,4 @@
-use obs_rs::{obs_register_module, obs_string, obs_rs_sys, prelude::*, properties::*, source::*};
+use obs_rs::{obs_register_module, obs_rs_sys, obs_string, prelude::*, properties::*, source::*};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::path::PathBuf;
