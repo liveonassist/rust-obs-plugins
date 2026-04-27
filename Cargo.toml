@@ -25,6 +25,11 @@ obs-32 = ["obs-rs-sys/obs-32"]
 # the Rust wrappers, not the link line. Disable to shrink compile time when
 # building plugins that only touch the source / output APIs.
 frontend-api = []
+# Adds `cxx::UniquePtr<T>` ergonomic conversion into `OwnedQtPtr` for
+# plugin authors using `cxx-qt` to construct Qt widgets. Pulls `cxx` into
+# the dependency graph; transparent if your plugin already uses cxx-qt
+# (which depends on `cxx` itself).
+cxx-qt = ["dep:cxx", "frontend-api"]
 
 [dependencies]
 obs-rs-sys = { path = "./obs-rs-sys", version = "0.4.0-tm", default-features = false }
@@ -32,3 +37,4 @@ paste = "1.0.15"
 log = { version = "0.4.28", features = ["std"] }
 num-traits = "0.2.19"
 thiserror = "2.0.17"
+cxx = { version = "1.0", optional = true }

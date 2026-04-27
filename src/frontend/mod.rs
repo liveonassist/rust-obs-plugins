@@ -766,13 +766,21 @@ unsafe extern "C" fn tools_menu_thunk(data: *mut c_void) {
 /// thereafter. Returns `Ok(true)` on success, `Ok(false)` if a dock
 /// with the same `id` already exists.
 ///
-/// # Example
+/// # Example (with `cxx-qt` feature)
 ///
 /// ```ignore
-/// // From a cxx-qt-allocated widget:
-/// let widget: cxx::UniquePtr<MyDock> = my_dock::create();
-/// let raw = widget.as_ref().unwrap() as *const _ as *mut c_void;
-/// let owned = unsafe { OwnedQtPtr::from_smart_ptr(raw, widget) };
+/// let dock: cxx::UniquePtr<MyDock> = my_dock::create();
+/// let owned = unsafe { OwnedQtPtr::from_cxx_unique_ptr(dock) }
+///     .expect("dock was null");
+/// add_dock_by_id("plugin-dock", "Plugin Dock", owned)?;
+/// ```
+///
+/// # Example (without the feature)
+///
+/// ```ignore
+/// let dock: cxx::UniquePtr<MyDock> = my_dock::create();
+/// let raw = dock.as_ref().unwrap() as *const _ as *mut c_void;
+/// let owned = unsafe { OwnedQtPtr::from_smart_ptr(raw, dock) };
 /// add_dock_by_id("plugin-dock", "Plugin Dock", owned)?;
 /// ```
 pub fn add_dock_by_id(

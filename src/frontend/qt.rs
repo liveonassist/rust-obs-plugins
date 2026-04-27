@@ -114,6 +114,55 @@ impl OwnedQtPtr {
         }
     }
 
+    /// Take ownership from a [`cxx::UniquePtr<T>`] holding a Qt object.
+    ///
+    /// Cleaner equivalent of:
+    /// ```ignore
+    /// let raw = ptr.as_ref().unwrap() as *const _ as *mut c_void;
+    /// unsafe { OwnedQtPtr::from_smart_ptr(raw, ptr) }
+    /// ```
+    ///
+    /// Internally calls [`cxx::UniquePtr::into_raw`], which transfers
+    /// ownership out of the unique pointer without running its `delete`
+    /// — so no `mem::forget` is needed.
+    ///
+    /// Returns `None` if `ptr` is null.
+    ///
+    /// Available with the `cxx-qt` Cargo feature.
+    ///
+    /// # Safety
+    ///
+    /// `T`'s underlying C++ type must inherit from the Qt class expected
+    /// by the OBS API you're calling — `QWidget` for
+    /// [`add_dock_by_id`], `QDockWidget` for [`add_custom_qdock`].
+    /// Mismatching the type is undefined behavior: OBS will reinterpret
+    /// the pointer as a different Qt class and call methods that don't
+    /// exist on the underlying object.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// // cxx-qt bridge produces a UniquePtr to a QWidget subclass.
+    /// let dock: cxx::UniquePtr<MyDock> = my_dock::create();
+    /// let owned = unsafe { OwnedQtPtr::from_cxx_unique_ptr(dock) }
+    ///     .expect("dock was null");
+    /// add_dock_by_id("plugin-dock", "Plugin Dock", owned)?;
+    /// ```
+    ///
+    /// [`add_dock_by_id`]: super::add_dock_by_id
+    /// [`add_custom_qdock`]: super::add_custom_qdock
+    #[cfg(feature = "cxx-qt")]
+    pub unsafe fn from_cxx_unique_ptr<T>(ptr: cxx::UniquePtr<T>) -> Option<Self>
+    where
+        T: cxx::memory::UniquePtrTarget,
+    {
+        let raw = ptr.into_raw();
+        NonNull::new(raw as *mut c_void).map(|raw| Self {
+            raw,
+            _not_send: PhantomData,
+        })
+    }
+
     pub(crate) fn as_ptr(&self) -> *mut c_void {
         self.raw.as_ptr()
     }
