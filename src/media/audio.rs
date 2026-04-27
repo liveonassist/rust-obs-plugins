@@ -1,5 +1,5 @@
 use obs_rs_sys::{
-    audio_output_get_channels, audio_output_get_sample_rate, audio_t, obs_audio_data,
+    audio_data, audio_output_get_channels, audio_output_get_sample_rate, audio_t, obs_audio_data,
 };
 
 pub struct AudioDataContext {
@@ -45,6 +45,30 @@ impl AudioDataContext {
                 frames as usize,
             ))
         }
+    }
+}
+
+/// Output-side audio frame view (the buffer libobs hands an output for raw
+/// audio consumption). Format/sample-rate come from the bound `AudioRef`.
+pub struct AudioDataOutputContext {
+    pointer: *mut audio_data,
+}
+
+impl AudioDataOutputContext {
+    pub fn from_raw(pointer: *mut audio_data) -> Self {
+        Self { pointer }
+    }
+
+    pub fn data_buffer(&self, idx: usize) -> *mut u8 {
+        unsafe { (*self.pointer).data[idx] }
+    }
+
+    pub fn frames(&self) -> u32 {
+        unsafe { (*self.pointer).frames }
+    }
+
+    pub fn timestamp(&self) -> u64 {
+        unsafe { (*self.pointer).timestamp }
     }
 }
 

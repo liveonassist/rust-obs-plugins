@@ -1,5 +1,8 @@
-use obs_rs_sys::{audio_data, encoder_packet, video_data};
-
+use crate::encoder::context::EncodedPacketView;
+use crate::media::{
+    audio::AudioDataOutputContext,
+    video::VideoDataOutputContext,
+};
 use crate::{prelude::DataObj, properties::Properties, string::ObsString};
 
 use super::{CreatableOutputContext, OutputRef};
@@ -23,19 +26,19 @@ pub trait GetNameOutput {
 }
 
 pub trait RawVideoOutput: Sized {
-    fn raw_video(&mut self, frame: &mut video_data);
+    fn raw_video(&mut self, frame: &mut VideoDataOutputContext);
 }
 
 pub trait RawAudioOutput: Sized {
-    fn raw_audio(&mut self, frame: &mut audio_data);
+    fn raw_audio(&mut self, frame: &mut AudioDataOutputContext);
 }
 
 pub trait RawAudio2Output: Sized {
-    fn raw_audio2(&mut self, idx: usize, frame: &mut audio_data);
+    fn raw_audio2(&mut self, idx: usize, frame: &mut AudioDataOutputContext);
 }
 
 pub trait EncodedPacketOutput: Sized {
-    fn encoded_packet(&mut self, packet: &mut encoder_packet);
+    fn encoded_packet(&mut self, packet: &EncodedPacketView<'_>);
 }
 
 pub trait UpdateOutput: Sized {

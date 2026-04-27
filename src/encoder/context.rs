@@ -150,3 +150,59 @@ impl EncoderPacket<'_> {
         self.raw.type_ = ty.as_raw();
     }
 }
+
+/// Read-only view over an `encoder_packet` an output is receiving (e.g.
+/// from a downstream encoder). The underlying buffer is owned by the
+/// encoder; the view only lives for the duration of the callback.
+pub struct EncodedPacketView<'a> {
+    raw: &'a encoder_packet,
+}
+
+impl<'a> EncodedPacketView<'a> {
+    pub(crate) unsafe fn from_raw(raw: &'a encoder_packet) -> Self {
+        Self { raw }
+    }
+
+    /// Encoded payload bytes.
+    pub fn data(&self) -> &'a [u8] {
+        // SAFETY: raw.data + raw.size is the encoder's owned buffer; valid for
+        // the lifetime of this view.
+        unsafe { std::slice::from_raw_parts(self.raw.data, self.raw.size) }
+    }
+
+    pub fn pts(&self) -> i64 {
+        self.raw.pts
+    }
+
+    pub fn dts(&self) -> i64 {
+        self.raw.dts
+    }
+
+    pub fn keyframe(&self) -> bool {
+        self.raw.keyframe
+    }
+
+    pub fn priority(&self) -> i32 {
+        self.raw.priority
+    }
+
+    pub fn drop_priority(&self) -> i32 {
+        self.raw.drop_priority
+    }
+
+    pub fn track_idx(&self) -> usize {
+        self.raw.track_idx
+    }
+
+    pub fn timebase(&self) -> (i32, i32) {
+        (self.raw.timebase_num, self.raw.timebase_den)
+    }
+
+    pub fn packet_type(&self) -> Option<EncoderType> {
+        match self.raw.type_ {
+            obs_rs_sys::obs_encoder_type_OBS_ENCODER_VIDEO => Some(EncoderType::Video),
+            obs_rs_sys::obs_encoder_type_OBS_ENCODER_AUDIO => Some(EncoderType::Audio),
+            _ => None,
+        }
+    }
+}

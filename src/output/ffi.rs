@@ -136,12 +136,14 @@ impl_simple_fn_mut! {
 
 pub unsafe extern "C" fn raw_video<D: RawVideoOutput>(data: *mut c_void, frame: *mut video_data) {
     let wrapper = &mut *(data as *mut DataWrapper<D>);
-    D::raw_video(&mut wrapper.data, &mut *frame)
+    let mut ctx = crate::media::video::VideoDataOutputContext::from_raw(frame);
+    D::raw_video(&mut wrapper.data, &mut ctx)
 }
 
 pub unsafe extern "C" fn raw_audio<D: RawAudioOutput>(data: *mut c_void, frame: *mut audio_data) {
     let wrapper = &mut *(data as *mut DataWrapper<D>);
-    D::raw_audio(&mut wrapper.data, &mut *frame)
+    let mut ctx = crate::media::audio::AudioDataOutputContext::from_raw(frame);
+    D::raw_audio(&mut wrapper.data, &mut ctx)
 }
 
 pub unsafe extern "C" fn raw_audio2<D: RawAudio2Output>(
@@ -150,7 +152,8 @@ pub unsafe extern "C" fn raw_audio2<D: RawAudio2Output>(
     frame: *mut audio_data,
 ) {
     let wrapper = &mut *(data as *mut DataWrapper<D>);
-    D::raw_audio2(&mut wrapper.data, idx, &mut *frame)
+    let mut ctx = crate::media::audio::AudioDataOutputContext::from_raw(frame);
+    D::raw_audio2(&mut wrapper.data, idx, &mut ctx)
 }
 
 pub unsafe extern "C" fn encoded_packet<D: EncodedPacketOutput>(
@@ -158,7 +161,8 @@ pub unsafe extern "C" fn encoded_packet<D: EncodedPacketOutput>(
     packet: *mut encoder_packet,
 ) {
     let wrapper = &mut *(data as *mut DataWrapper<D>);
-    D::encoded_packet(&mut wrapper.data, &mut *packet)
+    let view = crate::encoder::context::EncodedPacketView::from_raw(&*packet);
+    D::encoded_packet(&mut wrapper.data, &view)
 }
 
 pub unsafe extern "C" fn update<D: UpdateOutput>(data: *mut c_void, settings: *mut obs_data_t) {
