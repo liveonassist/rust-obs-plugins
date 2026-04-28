@@ -7,13 +7,15 @@
 
 use crate::encoder::{EncoderInfo, EncoderInfoBuilder, traits::Encodable};
 use crate::output::{OutputInfo, OutputInfoBuilder, traits::Outputable};
+use crate::service::{ServiceInfo, ServiceInfoBuilder, traits::Serviceable};
 use crate::source::{SourceInfo, SourceInfoBuilder, traits::Sourceable};
 use crate::string::cstring_from_ptr;
 use crate::{Error, Result};
 use obs_rs_sys::{
     obs_encoder_info, obs_get_module_author, obs_get_module_description, obs_get_module_file_name,
     obs_get_module_name, obs_module_t, obs_output_info, obs_register_encoder_s,
-    obs_register_output_s, obs_register_source_s, obs_source_info, size_t,
+    obs_register_output_s, obs_register_service_s, obs_register_source_s, obs_service_info,
+    obs_source_info, size_t,
 };
 use std::ffi::{CStr, CString};
 use std::marker::PhantomData;
@@ -34,6 +36,7 @@ pub struct LoadContext {
     sources: Vec<*mut obs_source_info>,
     outputs: Vec<*mut obs_output_info>,
     encoders: Vec<*mut obs_encoder_info>,
+    services: Vec<*mut obs_service_info>,
 }
 
 impl LoadContext {
@@ -51,6 +54,7 @@ impl LoadContext {
             sources: vec![],
             outputs: vec![],
             encoders: vec![],
+            services: vec![],
         }
     }
 
@@ -67,6 +71,11 @@ impl LoadContext {
     /// Returns a fresh [`EncoderInfoBuilder`] for the encoder type `D`.
     pub fn create_encoder_builder<D: Encodable>(&self) -> EncoderInfoBuilder<D> {
         EncoderInfoBuilder::new()
+    }
+
+    /// Returns a fresh [`ServiceInfoBuilder`] for the service type `D`.
+    pub fn create_service_builder<D: Serviceable>(&self) -> ServiceInfoBuilder<D> {
+        ServiceInfoBuilder::new()
     }
 
     /// Registers a source with OBS.
@@ -106,6 +115,19 @@ impl LoadContext {
         };
         self.encoders.push(pointer);
     }
+
+    /// Registers a service with OBS.
+    ///
+    /// The context retains ownership of the underlying allocation until
+    /// the module is unloaded.
+    pub fn register_service(&mut self, service: ServiceInfo) {
+        let pointer = unsafe {
+            let pointer = service.into_raw();
+            obs_register_service_s(pointer, std::mem::size_of::<obs_service_info>() as size_t);
+            pointer
+        };
+        self.services.push(pointer);
+    }
 }
 
 impl Drop for LoadContext {
@@ -118,6 +140,9 @@ impl Drop for LoadContext {
                 drop(Box::from_raw(pointer))
             }
             for pointer in self.encoders.drain(..) {
+                drop(Box::from_raw(pointer))
+            }
+            for pointer in self.services.drain(..) {
                 drop(Box::from_raw(pointer))
             }
         }

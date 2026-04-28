@@ -5,15 +5,17 @@ use obs_rs_sys::{
     obs_output_begin_data_capture, obs_output_can_begin_data_capture, obs_output_can_pause,
     obs_output_create, obs_output_end_data_capture, obs_output_force_stop,
     obs_output_get_audio_encoder, obs_output_get_delay, obs_output_get_frames_dropped,
-    obs_output_get_id, obs_output_get_name, obs_output_get_ref, obs_output_get_total_bytes,
-    obs_output_get_total_frames, obs_output_get_video_encoder, obs_output_initialize_encoders,
-    obs_output_pause, obs_output_paused, obs_output_release, obs_output_set_audio_encoder,
-    obs_output_set_delay, obs_output_set_media, obs_output_set_video_encoder, obs_output_start,
-    obs_output_stop, obs_output_t, obs_output_video,
+    obs_output_get_id, obs_output_get_name, obs_output_get_ref, obs_output_get_service,
+    obs_output_get_total_bytes, obs_output_get_total_frames, obs_output_get_video_encoder,
+    obs_output_initialize_encoders, obs_output_pause, obs_output_paused, obs_output_release,
+    obs_output_set_audio_encoder, obs_output_set_delay, obs_output_set_media,
+    obs_output_set_service, obs_output_set_video_encoder, obs_output_start, obs_output_stop,
+    obs_output_t, obs_output_video,
 };
 
 use crate::hotkey::HotkeyCallbacks;
 use crate::media::{audio::AudioRef, video::VideoRef};
+use crate::service::context::ServiceRef;
 use crate::string::cstring_from_ptr;
 use crate::{Error, Result};
 use crate::{hotkey::Hotkey, prelude::DataObj, wrapper::PtrWrapper};
@@ -252,6 +254,23 @@ impl OutputRef {
     /// Returns the number of frames the output has delivered.
     pub fn total_frames(&self) -> u32 {
         unsafe { obs_output_get_total_frames(self.inner) as u32 }
+    }
+
+    /// Binds a service to this output. Streaming outputs read the
+    /// protocol, ingest URL, and credentials they need from the service.
+    ///
+    /// libobs takes its own reference; the supplied [`ServiceRef`] keeps
+    /// its reference too, so the caller can drop it without invalidating
+    /// the binding.
+    pub fn set_service(&mut self, service: &ServiceRef) {
+        unsafe { obs_output_set_service(self.inner, service.inner) }
+    }
+
+    /// Returns the service currently bound to the output, or `None` if
+    /// none has been set.
+    pub fn service(&self) -> Option<ServiceRef> {
+        let ptr = unsafe { obs_output_get_service(self.inner) };
+        ServiceRef::from_raw(ptr)
     }
 }
 

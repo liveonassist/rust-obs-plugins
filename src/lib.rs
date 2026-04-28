@@ -180,6 +180,8 @@ pub mod output;
 pub mod properties;
 /// Crate-wide [`Error`] and [`Result`] types.
 pub mod result;
+/// Bindings for authoring custom OBS services.
+pub mod service;
 /// Bindings for authoring custom OBS sources.
 pub mod source;
 /// String helpers for interop with OBS C strings.
