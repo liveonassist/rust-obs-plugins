@@ -2,7 +2,7 @@ use std::ffi::c_void;
 use std::mem::forget;
 use std::os::raw::c_char;
 
-use obs_rs_sys::{encoder_frame, encoder_packet, obs_data_t, obs_encoder_t, obs_properties};
+use obs_sys_rs::{encoder_frame, encoder_packet, obs_data_t, obs_encoder_t, obs_properties};
 
 use crate::data::DataObj;
 use crate::wrapper::PtrWrapper;

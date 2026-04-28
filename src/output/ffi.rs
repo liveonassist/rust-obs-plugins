@@ -1,7 +1,7 @@
 use super::{CreatableOutputContext, OutputRef, traits::*};
 use crate::hotkey::{Hotkey, HotkeyCallbacks};
 use crate::{data::DataObj, wrapper::PtrWrapper};
-use obs_rs_sys::{
+use obs_sys_rs::{
     audio_data, encoder_packet, obs_hotkey_id, obs_hotkey_register_output, obs_hotkey_t,
     obs_properties, size_t, video_data,
 };
@@ -11,7 +11,7 @@ use std::ffi::c_void;
 use std::mem::forget;
 use std::os::raw::{c_char, c_int};
 
-use obs_rs_sys::{obs_data_t, obs_output_t};
+use obs_sys_rs::{obs_data_t, obs_output_t};
 
 struct DataWrapper<D> {
     data: D,

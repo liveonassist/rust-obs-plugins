@@ -1,6 +1,6 @@
 use std::ffi::{CStr, CString};
 
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_data_t, obs_enum_service_types, obs_enum_services, obs_get_service_by_name,
     obs_service_apply_encoder_settings, obs_service_can_try_to_connect, obs_service_connect_info,
     obs_service_connect_info_OBS_SERVICE_CONNECT_INFO_BEARER_TOKEN,
@@ -74,7 +74,7 @@ impl Resolution {
 /// the call site.
 ///
 /// [`GetConnectInfoService`]: super::traits::GetConnectInfoService
-/// [`obs_service_info::get_connect_info`]: obs_rs_sys::obs_service_info::get_connect_info
+/// [`obs_service_info::get_connect_info`]: obs_sys_rs::obs_service_info::get_connect_info
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum ConnectInfo {
     /// The ingest URL the output should connect to.

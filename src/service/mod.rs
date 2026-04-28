@@ -104,7 +104,7 @@
 use paste::item;
 use std::marker::PhantomData;
 
-use obs_rs_sys::obs_service_info;
+use obs_sys_rs::obs_service_info;
 
 pub mod context;
 mod ffi;

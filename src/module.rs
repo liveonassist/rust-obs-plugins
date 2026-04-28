@@ -11,7 +11,7 @@ use crate::service::{ServiceInfo, ServiceInfoBuilder, traits::Serviceable};
 use crate::source::{SourceInfo, SourceInfoBuilder, traits::Sourceable};
 use crate::string::cstring_from_ptr;
 use crate::{Error, Result};
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_encoder_info, obs_get_module_author, obs_get_module_description, obs_get_module_file_name,
     obs_get_module_name, obs_module_t, obs_output_info, obs_register_encoder_s,
     obs_register_output_s, obs_register_service_s, obs_register_source_s, obs_service_info,
@@ -211,14 +211,14 @@ macro_rules! obs_register_module {
         #[allow(missing_safety_doc)]
         #[unsafe(no_mangle)]
         pub unsafe extern "C" fn obs_module_set_pointer(
-            raw: *mut $crate::obs_rs_sys::obs_module_t,
+            raw: *mut $crate::obs_sys_rs::obs_module_t,
         ) {
             OBS_MODULE = ModuleRef::from_raw(raw).ok().map(<$t>::new);
         }
 
         #[allow(missing_safety_doc)]
         #[unsafe(no_mangle)]
-        pub unsafe extern "C" fn obs_current_module() -> *mut $crate::obs_rs_sys::obs_module_t {
+        pub unsafe extern "C" fn obs_current_module() -> *mut $crate::obs_sys_rs::obs_module_t {
             if let Some(module) = &OBS_MODULE {
                 module.get_ctx().get_raw()
             } else {
@@ -229,7 +229,7 @@ macro_rules! obs_register_module {
         #[allow(missing_safety_doc)]
         #[unsafe(no_mangle)]
         pub unsafe extern "C" fn obs_module_ver() -> u32 {
-            $crate::obs_rs_sys::LIBOBS_API_MAJOR_VER
+            $crate::obs_sys_rs::LIBOBS_API_MAJOR_VER
         }
 
         #[allow(missing_safety_doc)]

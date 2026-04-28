@@ -27,7 +27,7 @@
 use std::os::raw::c_void;
 
 #[allow(unused_imports)]
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_frontend_add_event_callback, obs_frontend_event,
     obs_frontend_event_OBS_FRONTEND_EVENT_EXIT,
     obs_frontend_event_OBS_FRONTEND_EVENT_FINISHED_LOADING,
@@ -74,7 +74,7 @@ use obs_rs_sys::{
 
 #[cfg(feature = "obs-32")]
 #[allow(unused_imports)]
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_frontend_event_OBS_FRONTEND_EVENT_CANVAS_ADDED,
     obs_frontend_event_OBS_FRONTEND_EVENT_CANVAS_REMOVED,
 };

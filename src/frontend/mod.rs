@@ -62,7 +62,7 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_void};
 use std::path::PathBuf;
 
-use obs_rs_sys::{
+use obs_sys_rs::{
     bfree, config_t, obs_frontend_defer_save_begin, obs_frontend_defer_save_end,
     obs_frontend_get_current_preview_scene, obs_frontend_get_current_profile,
     obs_frontend_get_current_profile_path, obs_frontend_get_current_record_output_path,
@@ -96,7 +96,7 @@ use obs_rs_sys::{
     obs_frontend_virtualcam_active, obs_service_t,
 };
 #[cfg(any(feature = "obs-31", feature = "obs-32"))]
-use obs_rs_sys::{obs_frontend_get_app_config, obs_frontend_get_user_config};
+use obs_sys_rs::{obs_frontend_get_app_config, obs_frontend_get_user_config};
 
 use crate::source::SourceRef;
 use crate::wrapper::PtrWrapper;
@@ -119,7 +119,7 @@ pub use qt::*;
 /// Opaque pointer to an `obs_service_t`.
 ///
 /// There is no safe `ServiceRef` wrapper yet; if you need to call into
-/// `obs_service_*` functions, do so manually via [`obs_rs_sys`].
+/// `obs_service_*` functions, do so manually via [`obs_sys_rs`].
 pub type ServiceHandle = *mut obs_service_t;
 
 /// Opaque pointer to an OBS `config_t`.
@@ -426,14 +426,14 @@ pub fn set_current_profile(name: &str) -> Result<(), std::ffi::NulError> {
 /// Creates a new empty profile with the given name.
 pub fn create_profile(name: &str) -> Result<(), std::ffi::NulError> {
     let cstr = CString::new(name)?;
-    unsafe { obs_rs_sys::obs_frontend_create_profile(cstr.as_ptr()) };
+    unsafe { obs_sys_rs::obs_frontend_create_profile(cstr.as_ptr()) };
     Ok(())
 }
 
 /// Duplicates the current profile under a new name.
 pub fn duplicate_profile(name: &str) -> Result<(), std::ffi::NulError> {
     let cstr = CString::new(name)?;
-    unsafe { obs_rs_sys::obs_frontend_duplicate_profile(cstr.as_ptr()) };
+    unsafe { obs_sys_rs::obs_frontend_duplicate_profile(cstr.as_ptr()) };
     Ok(())
 }
 
@@ -441,7 +441,7 @@ pub fn duplicate_profile(name: &str) -> Result<(), std::ffi::NulError> {
 /// active.
 pub fn delete_profile(name: &str) -> Result<(), std::ffi::NulError> {
     let cstr = CString::new(name)?;
-    unsafe { obs_rs_sys::obs_frontend_delete_profile(cstr.as_ptr()) };
+    unsafe { obs_sys_rs::obs_frontend_delete_profile(cstr.as_ptr()) };
     Ok(())
 }
 
@@ -686,7 +686,7 @@ pub fn locale_string(key: &str) -> Option<String> {
 ///
 /// The push side of this API takes a callback function; we don't currently
 /// expose a Rust wrapper for it because it sees only `const char *` input
-/// strings. If you need it, call it via [`obs_rs_sys`] directly.
+/// strings. If you need it, call it via [`obs_sys_rs`] directly.
 pub fn pop_ui_translation() {
     unsafe { obs_frontend_pop_ui_translation() }
 }
@@ -739,7 +739,7 @@ pub fn add_tools_menu_qaction(
     name: &str,
 ) -> Result<Option<BorrowedQtPtr<'static>>, std::ffi::NulError> {
     let cstr = CString::new(name)?;
-    let raw = unsafe { obs_rs_sys::obs_frontend_add_tools_menu_qaction(cstr.as_ptr()) };
+    let raw = unsafe { obs_sys_rs::obs_frontend_add_tools_menu_qaction(cstr.as_ptr()) };
     Ok(unsafe { BorrowedQtPtr::from_raw(raw) })
 }
 
@@ -760,7 +760,7 @@ pub fn add_tools_menu_item<F: FnMut() + 'static>(
     // the process. Freeing it would cause a UAF on the next click.
     let raw = Box::into_raw(boxed);
     unsafe {
-        obs_rs_sys::obs_frontend_add_tools_menu_item(
+        obs_sys_rs::obs_frontend_add_tools_menu_item(
             cstr.as_ptr(),
             Some(tools_menu_thunk),
             raw as *mut c_void,
@@ -806,7 +806,7 @@ pub fn add_dock_by_id(
     let id = CString::new(id)?;
     let title = CString::new(title)?;
     Ok(unsafe {
-        obs_rs_sys::obs_frontend_add_dock_by_id(id.as_ptr(), title.as_ptr(), widget.as_ptr())
+        obs_sys_rs::obs_frontend_add_dock_by_id(id.as_ptr(), title.as_ptr(), widget.as_ptr())
     })
 }
 
@@ -814,7 +814,7 @@ pub fn add_dock_by_id(
 /// [`add_custom_qdock`].
 pub fn remove_dock(id: &str) -> Result<(), std::ffi::NulError> {
     let cstr = CString::new(id)?;
-    unsafe { obs_rs_sys::obs_frontend_remove_dock(cstr.as_ptr()) };
+    unsafe { obs_sys_rs::obs_frontend_remove_dock(cstr.as_ptr()) };
     Ok(())
 }
 
@@ -826,7 +826,7 @@ pub fn remove_dock(id: &str) -> Result<(), std::ffi::NulError> {
 /// rather than letting OBS wrap a plain `QWidget` for you.
 pub fn add_custom_qdock(id: &str, dock: OwnedQtPtr) -> Result<bool, std::ffi::NulError> {
     let id = CString::new(id)?;
-    Ok(unsafe { obs_rs_sys::obs_frontend_add_custom_qdock(id.as_ptr(), dock.as_ptr()) })
+    Ok(unsafe { obs_sys_rs::obs_frontend_add_custom_qdock(id.as_ptr(), dock.as_ptr()) })
 }
 
 // ---------------------------------------------------------------------------

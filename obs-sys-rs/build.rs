@@ -20,7 +20,7 @@ fn selected_obs_major() -> u32 {
     match enabled.as_slice() {
         [m] => *m,
         [] => panic!(
-            "obs-rs-sys: no OBS version feature enabled. Enable exactly one of: {}.",
+            "obs-sys-rs: no OBS version feature enabled. Enable exactly one of: {}.",
             SUPPORTED_MAJORS
                 .iter()
                 .map(|m| format!("obs-{m}"))
@@ -28,7 +28,7 @@ fn selected_obs_major() -> u32 {
                 .join(", ")
         ),
         many => panic!(
-            "obs-rs-sys: multiple OBS version features enabled ({}). Enable exactly one. \
+            "obs-sys-rs: multiple OBS version features enabled ({}). Enable exactly one. \
              If you depend on obs-rs from a workspace, set `default-features = false` \
              on every member that pulls it in and pick the same `obs-XX` feature everywhere.",
             many.iter()
@@ -53,7 +53,7 @@ fn read_header_version(submodule: &Path) -> ObsVersion {
     let config_path = submodule.join("libobs/obs-config.h");
     let contents = fs::read_to_string(&config_path).unwrap_or_else(|_| {
         panic!(
-            "obs-rs-sys: cannot read {} — submodule not initialized? \
+            "obs-sys-rs: cannot read {} — submodule not initialized? \
              Run: git submodule update --init {}",
             config_path.display(),
             submodule.display()
@@ -65,11 +65,11 @@ fn read_header_version(submodule: &Path) -> ObsVersion {
             let line = line.trim();
             if let Some(rest) = line.strip_prefix(&format!("#define {key} ")) {
                 return rest.trim().parse().unwrap_or_else(|_| {
-                    panic!("obs-rs-sys: failed to parse {key} from obs-config.h")
+                    panic!("obs-sys-rs: failed to parse {key} from obs-config.h")
                 });
             }
         }
-        panic!("obs-rs-sys: {key} not found in obs-config.h");
+        panic!("obs-sys-rs: {key} not found in obs-config.h");
     }
 
     ObsVersion {
@@ -173,7 +173,7 @@ fn main() {
     let header_version = read_header_version(&submodule);
     if header_version.major != major {
         panic!(
-            "obs-rs-sys: feature obs-{major} is enabled but {}/libobs/obs-config.h reports \
+            "obs-sys-rs: feature obs-{major} is enabled but {}/libobs/obs-config.h reports \
              OBS {}.{}.{}. The submodule is checked out at the wrong tag — fix with: \
              git -C {} checkout <tag-in-the-{major}.x.y-line>",
             submodule.display(),
@@ -187,7 +187,7 @@ fn main() {
     if let Some(linked_major) = detect_linked_obs_major() {
         if linked_major != major {
             panic!(
-                "obs-rs-sys: feature obs-{major} is enabled but the linked libobs reports major \
+                "obs-sys-rs: feature obs-{major} is enabled but the linked libobs reports major \
                  version {linked_major}. Either switch features (--no-default-features --features \
                  obs-{linked_major}) or enter the matching dev shell (nix develop \
                  .#obs-v{linked_major}). To override the detected value set \
@@ -196,7 +196,7 @@ fn main() {
         }
     } else {
         println!(
-            "cargo:warning=obs-rs-sys: could not determine linked libobs major version; \
+            "cargo:warning=obs-sys-rs: could not determine linked libobs major version; \
              skipping link-time version check (set OBS_LIBRARY_MAJOR_VER to silence this)."
         );
     }
@@ -336,7 +336,7 @@ fn main() {
 
             if major != *SUPPORTED_MAJORS.last().unwrap() {
                 panic!(
-                    "obs-rs-sys: bindgen failed for obs-{major} and the pre-generated fallback only \
+                    "obs-sys-rs: bindgen failed for obs-{major} and the pre-generated fallback only \
                      covers obs-{}. Initialize the submodule (git submodule update --init {}) \
                      and ensure libclang is available. Original error: {e}",
                     SUPPORTED_MAJORS.last().unwrap(),

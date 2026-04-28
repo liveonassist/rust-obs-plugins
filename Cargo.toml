@@ -7,21 +7,21 @@ authors = [
 ]
 edition = "2024"
 license = "GPL-2.0"
-description = "Safe wrapper of obs-rs-sys"
+description = "Safe wrapper of obs-sys-rs"
 repository = "https://github.com/liveonassist/obs-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["obs-rs-sys", "plugins/*"]
+members = ["obs-sys-rs", "plugins/*"]
 
 [features]
 default = ["obs-32", "frontend-api"]
-obs-30 = ["obs-rs-sys/obs-30"]
-obs-31 = ["obs-rs-sys/obs-31"]
-obs-32 = ["obs-rs-sys/obs-32"]
+obs-30 = ["obs-sys-rs/obs-30"]
+obs-31 = ["obs-sys-rs/obs-31"]
+obs-32 = ["obs-sys-rs/obs-32"]
 # Wraps `obs-frontend-api`, OBS Studio's UI-side plugin API. The C library
-# is already linked unconditionally by `obs-rs-sys`; this feature toggles
+# is already linked unconditionally by `obs-sys-rs`; this feature toggles
 # the Rust wrappers, not the link line. Disable to shrink compile time when
 # building plugins that only touch the source / output APIs.
 frontend-api = []
@@ -32,7 +32,7 @@ frontend-api = []
 cxx-qt = ["dep:cxx", "frontend-api"]
 
 [dependencies]
-obs-rs-sys = { path = "./obs-rs-sys", version = "0.1.0", default-features = false }
+obs-sys-rs = { path = "./obs-sys-rs", version = "0.1.0", default-features = false }
 paste = "1.0.15"
 log = { version = "0.4.28", features = ["std"] }
 num-traits = "0.2.19"

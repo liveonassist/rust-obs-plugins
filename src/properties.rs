@@ -3,7 +3,7 @@
 
 use crate::{native_enum, string::ptr_or_null, wrapper::PtrWrapper};
 use num_traits::{Bounded, Float, Num, NumCast, PrimInt, ToPrimitive, one};
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_combo_format, obs_combo_format_OBS_COMBO_FORMAT_FLOAT,
     obs_combo_format_OBS_COMBO_FORMAT_INT, obs_combo_format_OBS_COMBO_FORMAT_INVALID,
     obs_combo_format_OBS_COMBO_FORMAT_STRING, obs_combo_type,

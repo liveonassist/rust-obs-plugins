@@ -1,4 +1,4 @@
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_source_frame, video_data, video_format, video_format_VIDEO_FORMAT_AYUV,
     video_format_VIDEO_FORMAT_BGR3, video_format_VIDEO_FORMAT_BGRA, video_format_VIDEO_FORMAT_BGRX,
     video_format_VIDEO_FORMAT_I010, video_format_VIDEO_FORMAT_I40A, video_format_VIDEO_FORMAT_I42A,

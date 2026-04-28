@@ -15,7 +15,7 @@
 use std::ffi::CStr;
 use std::os::raw::{c_char, c_void};
 
-use obs_rs_sys::{
+use obs_sys_rs::{
     bfree, obs_frontend_get_profiles, obs_frontend_get_scene_collections,
     obs_frontend_get_scene_names, obs_frontend_get_scenes, obs_frontend_get_transitions,
     obs_frontend_source_list, obs_source_t,
@@ -56,7 +56,7 @@ pub fn profiles() -> Vec<String> {
 /// with that name already exists.
 pub fn add_scene_collection(name: &str) -> Result<bool, std::ffi::NulError> {
     let cstr = std::ffi::CString::new(name)?;
-    Ok(unsafe { obs_rs_sys::obs_frontend_add_scene_collection(cstr.as_ptr()) })
+    Ok(unsafe { obs_sys_rs::obs_frontend_add_scene_collection(cstr.as_ptr()) })
 }
 
 // ---------------------------------------------------------------------------

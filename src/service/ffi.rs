@@ -3,7 +3,7 @@ use std::mem::forget;
 use std::os::raw::{c_char, c_int};
 use std::ptr;
 
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_data_t, obs_output_t, obs_properties_t, obs_service_connect_info, obs_service_resolution,
     obs_service_t,
 };

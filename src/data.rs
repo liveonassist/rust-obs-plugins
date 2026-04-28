@@ -5,7 +5,7 @@ use std::{
     marker::PhantomData,
 };
 
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_data_array_count, obs_data_array_item, obs_data_array_release, obs_data_array_t,
     obs_data_clear, obs_data_create, obs_data_create_from_json, obs_data_create_from_json_file,
     obs_data_create_from_json_file_safe, obs_data_erase, obs_data_get_json, obs_data_item_byname,

@@ -1,4 +1,4 @@
-use obs_rs::{obs_register_module, obs_rs_sys, prelude::*, properties::*, source::*};
+use obs_rs::{obs_register_module, obs_sys_rs, prelude::*, properties::*, source::*};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ffi::CStr;
@@ -13,7 +13,7 @@ use loader::{Avatar, AvatarLoader, ImageData};
 /// Кэш текстур для предотвращения повторной загрузки
 struct TextureCache {
     /// Карта путь -> текстура OBS (raw pointer)
-    textures: HashMap<PathBuf, *mut obs_rs_sys::gs_texture_t>,
+    textures: HashMap<PathBuf, *mut obs_sys_rs::gs_texture_t>,
 }
 
 unsafe impl Send for TextureCache {}
@@ -28,16 +28,16 @@ impl TextureCache {
 
     /// Получить текстуру или создать новую из ImageData
     /// Должно вызываться только в графическом контексте (video_render)
-    fn get_or_create(&mut self, image: &ImageData) -> Option<*mut obs_rs_sys::gs_texture_t> {
+    fn get_or_create(&mut self, image: &ImageData) -> Option<*mut obs_sys_rs::gs_texture_t> {
         if !self.textures.contains_key(&image.path) {
             unsafe {
                 let data_ptr = image.data.as_ptr();
                 let mut data_ptr_ptr = data_ptr;
 
-                let texture = obs_rs_sys::gs_texture_create(
+                let texture = obs_sys_rs::gs_texture_create(
                     image.width,
                     image.height,
-                    obs_rs_sys::gs_color_format_GS_RGBA,
+                    obs_sys_rs::gs_color_format_GS_RGBA,
                     1,
                     &mut data_ptr_ptr as *mut *const u8,
                     0,
@@ -56,7 +56,7 @@ impl TextureCache {
     fn clear(&mut self) {
         unsafe {
             for (_, texture) in self.textures.drain() {
-                obs_rs_sys::gs_texture_destroy(texture);
+                obs_sys_rs::gs_texture_destroy(texture);
             }
         }
     }
@@ -466,7 +466,7 @@ impl VideoRenderSource for AvatarSource {
                 unsafe {
                     // ✅ ИСПОЛЬЗУЕМ obs_source_draw КАК В C++ ВЕРСИИ
                     // Это правильный способ для source (не filter)
-                    obs_rs_sys::obs_source_draw(
+                    obs_sys_rs::obs_source_draw(
                         tex_ptr, x as i32, // x position
                         y as i32, // y position
                         0,        // cx (0 = use texture width)
@@ -569,7 +569,7 @@ impl VideoRenderSource for AvatarSource {
 }
 
 impl KeyClickSource for AvatarSource {
-    fn key_click(&mut self, event: obs_rs_sys::obs_key_event, pressed: bool) {
+    fn key_click(&mut self, event: obs_sys_rs::obs_key_event, pressed: bool) {
         let Some(ref avatar) = self.avatar else {
             return;
         };
@@ -630,7 +630,7 @@ impl KeyClickSource for AvatarSource {
 impl MouseClickSource for AvatarSource {
     fn mouse_click(
         &mut self,
-        _event: obs_rs_sys::obs_mouse_event,
+        _event: obs_sys_rs::obs_mouse_event,
         button: MouseButton,
         pressed: bool,
         _click_count: u8,
@@ -654,7 +654,7 @@ impl MouseClickSource for AvatarSource {
 }
 
 impl MouseMoveSource for AvatarSource {
-    fn mouse_move(&mut self, _event: obs_rs_sys::obs_mouse_event, _leave: bool) {
+    fn mouse_move(&mut self, _event: obs_sys_rs::obs_mouse_event, _leave: bool) {
         // TODO: Добавить логику отслеживания мыши глазами аватара
         // let mouse_x = event.x;
         // let mouse_y = event.y;

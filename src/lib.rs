@@ -145,7 +145,7 @@
 
 /// Raw, unsafe bindings to the OBS C API. Re-exported so plugins can drop
 /// down to FFI when needed.
-pub use obs_rs_sys;
+pub use obs_sys_rs;
 
 /// Helpers for wrapping reference-counted OBS pointer types.
 #[macro_use]

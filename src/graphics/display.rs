@@ -1,4 +1,4 @@
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_display_add_draw_callback, obs_display_destroy, obs_display_enabled,
     obs_display_remove_draw_callback, obs_display_resize, obs_display_set_background_color,
     obs_display_set_enabled, obs_display_size, obs_display_t, obs_render_main_texture,

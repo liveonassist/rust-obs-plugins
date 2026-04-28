@@ -87,8 +87,8 @@ use std::marker::PhantomData;
 
 use enumflags2::{BitFlags, bitflags};
 #[cfg(any(feature = "obs-31", feature = "obs-32"))]
-use obs_rs_sys::OBS_ENCODER_CAP_SCALING;
-use obs_rs_sys::{
+use obs_sys_rs::OBS_ENCODER_CAP_SCALING;
+use obs_sys_rs::{
     OBS_ENCODER_CAP_DEPRECATED, OBS_ENCODER_CAP_DYN_BITRATE, OBS_ENCODER_CAP_INTERNAL,
     OBS_ENCODER_CAP_PASS_TEXTURE, OBS_ENCODER_CAP_ROI, obs_encoder_get_codec,
     obs_encoder_get_height, obs_encoder_get_id, obs_encoder_get_name, obs_encoder_get_ref,
@@ -239,7 +239,7 @@ impl EncoderRef {
     /// Returns the video output this encoder is bound to, or `None` if it
     /// has not been associated with one. Only meaningful for video encoders.
     pub fn video(&self) -> Option<VideoRef> {
-        let ptr = unsafe { obs_rs_sys::obs_encoder_video(self.inner) };
+        let ptr = unsafe { obs_sys_rs::obs_encoder_video(self.inner) };
         if ptr.is_null() {
             None
         } else {
@@ -250,7 +250,7 @@ impl EncoderRef {
     /// Returns the audio output this encoder is bound to, or `None` if it
     /// has not been associated with one. Only meaningful for audio encoders.
     pub fn audio(&self) -> Option<AudioRef> {
-        let ptr = unsafe { obs_rs_sys::obs_encoder_audio(self.inner) };
+        let ptr = unsafe { obs_sys_rs::obs_encoder_audio(self.inner) };
         if ptr.is_null() {
             None
         } else {

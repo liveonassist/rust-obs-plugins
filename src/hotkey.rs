@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use obs_rs_sys::{obs_hotkey_get_id, obs_hotkey_id, obs_hotkey_t};
+use obs_sys_rs::{obs_hotkey_get_id, obs_hotkey_id, obs_hotkey_t};
 
 /// Internal collection of hotkey registrations queued during plugin
 /// instance construction.

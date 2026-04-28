@@ -7,7 +7,7 @@
 use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_data_addref, obs_data_release, obs_data_t, obs_frontend_add_preload_callback,
     obs_frontend_add_save_callback, obs_frontend_add_undo_redo_action,
     obs_frontend_remove_preload_callback, obs_frontend_remove_save_callback,

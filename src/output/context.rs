@@ -1,6 +1,6 @@
 use std::ffi::{CStr, CString};
 
-use obs_rs_sys::{
+use obs_sys_rs::{
     obs_encoder_t, obs_enum_output_types, obs_enum_outputs, obs_output_active, obs_output_audio,
     obs_output_begin_data_capture, obs_output_can_begin_data_capture, obs_output_can_pause,
     obs_output_create, obs_output_end_data_capture, obs_output_force_stop,

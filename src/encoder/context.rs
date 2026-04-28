@@ -1,4 +1,4 @@
-use obs_rs_sys::encoder_packet;
+use obs_sys_rs::encoder_packet;
 
 use crate::data::DataObj;
 
@@ -36,11 +36,11 @@ impl<'a, D> CreatableEncoderContext<'a, D> {
 ///
 /// [`EncodeEncoder::encode`]: super::traits::EncodeEncoder::encode
 pub struct EncoderFrame<'a> {
-    raw: &'a obs_rs_sys::encoder_frame,
+    raw: &'a obs_sys_rs::encoder_frame,
 }
 
 impl<'a> EncoderFrame<'a> {
-    pub(crate) unsafe fn from_raw(raw: &'a obs_rs_sys::encoder_frame) -> Self {
+    pub(crate) unsafe fn from_raw(raw: &'a obs_sys_rs::encoder_frame) -> Self {
         Self { raw }
     }
 
@@ -254,8 +254,8 @@ impl<'a> EncodedPacketView<'a> {
     /// underlying value does not correspond to a known encoder type.
     pub fn packet_type(&self) -> Option<EncoderType> {
         match self.raw.type_ {
-            obs_rs_sys::obs_encoder_type_OBS_ENCODER_VIDEO => Some(EncoderType::Video),
-            obs_rs_sys::obs_encoder_type_OBS_ENCODER_AUDIO => Some(EncoderType::Audio),
+            obs_sys_rs::obs_encoder_type_OBS_ENCODER_VIDEO => Some(EncoderType::Video),
+            obs_sys_rs::obs_encoder_type_OBS_ENCODER_AUDIO => Some(EncoderType::Audio),
             _ => None,
         }
     }

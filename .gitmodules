@@ -1,9 +1,9 @@
-[submodule "obs-rs-sys/obs-v32"]
-	path = obs-rs-sys/obs-v32
+[submodule "obs-sys-rs/obs-v32"]
+	path = obs-sys-rs/obs-v32
 	url = https://github.com/obsproject/obs-studio.git
-[submodule "obs-rs-sys/obs-v31"]
-	path = obs-rs-sys/obs-v31
+[submodule "obs-sys-rs/obs-v31"]
+	path = obs-sys-rs/obs-v31
 	url = https://github.com/obsproject/obs-studio.git
-[submodule "obs-rs-sys/obs-v30"]
-	path = obs-rs-sys/obs-v30
+[submodule "obs-sys-rs/obs-v30"]
+	path = obs-sys-rs/obs-v30
 	url = https://github.com/obsproject/obs-studio.git

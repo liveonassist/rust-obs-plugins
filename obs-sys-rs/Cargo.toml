@@ -1,5 +1,5 @@
 [package]
-name = "obs-rs-sys"
+name = "obs-sys-rs"
 version = "0.1.0"
 authors = [
     "Bennett Hardwick <me@bennetthardwick.com>",

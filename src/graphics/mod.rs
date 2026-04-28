@@ -3,7 +3,7 @@ pub mod display;
 use crate::{Error, Result, native_enum};
 use core::convert::TryFrom;
 use core::ptr::null_mut;
-use obs_rs_sys::{
+use obs_sys_rs::{
     GS_DYNAMIC, gs_address_mode, gs_address_mode_GS_ADDRESS_BORDER,
     gs_address_mode_GS_ADDRESS_CLAMP, gs_address_mode_GS_ADDRESS_MIRROR,
     gs_address_mode_GS_ADDRESS_MIRRORONCE, gs_address_mode_GS_ADDRESS_WRAP, gs_color_format,

@@ -3,7 +3,7 @@ use std::ffi::CString;
 use crate::hotkey::{Hotkey, HotkeyCallbacks};
 use crate::media::audio::AudioRef;
 use crate::prelude::DataObj;
-use obs_rs_sys::obs_get_audio;
+use obs_sys_rs::obs_get_audio;
 
 /// Process-global context provided to source callbacks.
 ///

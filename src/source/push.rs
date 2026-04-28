@@ -14,7 +14,7 @@
 //!
 //! [`Sourceable::create`]: super::Sourceable::create
 
-use obs_rs_sys::{
+use obs_sys_rs::{
     OBS_SOURCE_ASYNC_VIDEO, OBS_SOURCE_AUDIO, audio_format, audio_format_AUDIO_FORMAT_16BIT,
     audio_format_AUDIO_FORMAT_16BIT_PLANAR, audio_format_AUDIO_FORMAT_32BIT,
     audio_format_AUDIO_FORMAT_32BIT_PLANAR, audio_format_AUDIO_FORMAT_FLOAT,
