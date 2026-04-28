@@ -1,13 +1,15 @@
 [package]
 name = "obs-rs-sys"
-version = "0.4.0-tm"
-authors = ["Bennett Hardwick <me@bennetthardwick.com>"]
+version = "0.1.0"
+authors = [
+    "Bennett Hardwick <me@bennetthardwick.com>",
+    "Christopher Tam <ohgodtamit@gmail.com>",
+]
 edition = "2024"
-rust-version = "1.95.0"
 links = "obs"
-description = "Bindgen of <obs/obs.h>"
+description = "Bindgen of OBS C APIs."
 license = "GPL-2.0"
-repository = "https://github.com/TakiMoysha/rust-obs-plugins"
+repository = "https://github.com/liveonassist/obs-rs"
 
 [features]
 default = ["obs-32"]

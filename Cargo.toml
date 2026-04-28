@@ -1,6 +1,6 @@
 [package]
 name = "obs-rs"
-version = "0.5.0-tm"
+version = "0.1.0"
 authors = [
     "Bennett Hardwick <me@bennetthardwick.com>",
     "Christopher Tam <ohgodtamit@gmail.com",
@@ -8,7 +8,7 @@ authors = [
 edition = "2024"
 license = "GPL-2.0"
 description = "Safe wrapper of obs-rs-sys"
-repository = "https://github.com/TakiMoysha/rust-obs-plugins"
+repository = "https://github.com/liveonassist/obs-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -32,7 +32,7 @@ frontend-api = []
 cxx-qt = ["dep:cxx", "frontend-api"]
 
 [dependencies]
-obs-rs-sys = { path = "./obs-rs-sys", version = "0.4.0-tm", default-features = false }
+obs-rs-sys = { path = "./obs-rs-sys", version = "0.1.0", default-features = false }
 paste = "1.0.15"
 log = { version = "0.4.28", features = ["std"] }
 num-traits = "0.2.19"
